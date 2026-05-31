@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitness — Arpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:    #F7F7F7;
+  --sur:   #FFFFFF;
+  --b:     #EEEEEE;
+  --bl:    #F2F2F2;
+  --t1:    #111111;
+  --t2:    #555555;
+  --t3:    #AAAAAA;
+  --grn:   #1A7F4B;
+  --grn-l: #E9F7EE;
+  --h0:    #EAEAEA;
+  --h1:    #AEDCBE;
+  --h2:    #57BB8A;
+  --h3:    #2E8B5C;
+  --h4:    #1A5C38;
+  --z1:#BFDBFE; --z2:#6EE7B7; --z3:#FDE68A; --z4:#FCA5A5; --z5:#F87171;
+  --sleep-deep:#4F46E5; --sleep-rem:#818CF8; --sleep-light:#C7D2FE; --sleep-wake:#F3F4F6;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased}
+
+/* ── PAGE ── */
+.w{max-width:1120px;margin:0 auto;padding:0 32px}
+
+/* ── HEADER ── */
+nav{height:48px;background:var(--sur);border-bottom:1px solid var(--b);box-shadow:0 1px 0 #E8E8E8;position:sticky;top:0;z-index:50}
+nav .w{display:flex;align-items:center;justify-content:space-between;height:100%}
+.logo{font-size:14px;font-weight:700;letter-spacing:-.02em}
+.nav-r{font-size:11px;color:var(--t3)}
+
+/* ── CALENDAR SECTION ── */
+.cal-sec{padding:24px 0 24px;border-bottom:1px solid var(--bl);animation:up .3s ease both}
+.cal-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
+
+.cal-wrap{display:flex;gap:6px;align-items:flex-start}
+/* Day labels column */
+.cal-days{padding-top:18px;width:32px;flex-shrink:0}
+.cal-days-grid{display:grid;gap:2px;font-size:10px;color:var(--t3);line-height:1}
+.cal-days-grid span{display:flex;align-items:center}
+/* Calendar body */
+.cal-body{flex:1;min-width:0}
+.cal-months-row{position:relative;height:16px;margin-bottom:4px}
+.cal-mlbl{position:absolute;font-size:11px;font-weight:500;color:var(--t3);top:0;white-space:nowrap}
+.cal-grid{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column}
+.hc{border-radius:2px;position:relative;aspect-ratio:1}
+.hc:hover .hc-tip{opacity:1;pointer-events:auto}
+.hc-tip{
+  opacity:0;pointer-events:none;position:absolute;
+  bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--t1);color:#fff;
+  font-size:10px;padding:5px 8px;border-radius:4px;white-space:nowrap;z-index:99;
+  transition:opacity .12s
+}
+.hc-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--t1)}
+
+.cal-foot{display:flex;align-items:center;margin-top:10px;font-size:11px;color:var(--t3)}
+.cal-foot-stats{margin-right:auto}
+.cal-legend{display:flex;align-items:center;gap:3px}
+.cal-legend span{font-size:10px;color:var(--t3)}
+.cal-legend .hc{cursor:default;width:10px;height:10px}
+
+/* ── METRICS STRIP ── */
+.metrics-sec{border-bottom:1px solid var(--bl);animation:up .3s .05s ease both}
+.metrics-strip{display:flex;padding:20px 0;align-items:flex-start}
+.metric{flex:1;padding:0 20px;border-right:1px solid var(--bl);min-width:0;position:relative}
+.metric:first-child{padding-left:0}
+.metric:last-child{border-right:none}
+.metric::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:1px;height:40px;background:var(--bl)}
+.metric:last-child::after{display:none}
+.m-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--t1);margin-bottom:4px}
+.metric:first-child .m-num{font-size:30px}
+.m-lbl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.m-ctx{font-size:11px;color:var(--t3);font-style:italic}
+
+/* ── CONTROLS ── */
+.controls{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--bl);flex-wrap:wrap;animation:up .3s .1s ease both}
+.pill-group{display:inline-flex;background:#EFEFEF;border-radius:6px;padding:2px;gap:1px}
+.pill{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:500;color:var(--t2);padding:6px 14px;border-radius:5px;cursor:pointer;transition:background .12s,color .12s}
+.pill.on{background:var(--sur);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pill.dim{opacity:.35;cursor:pointer}
+.ctrl-spacer{flex:1}
+.sec-tabs{display:inline-flex;border-bottom:2px solid transparent;gap:0}
+.stab{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:500;color:var(--t3);padding:6px 16px 8px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-18px;transition:color .12s,border-color .12s}
+.stab.on{color:var(--t1);font-weight:600;border-bottom:2px solid #111}
+
+/* ── STAGE CARD ── */
+.stage-wrap{padding:16px 0;animation:up .3s .15s ease both}
+.stage-card{background:var(--sur);border:1px solid var(--b);border-left:4px solid var(--grn);border-radius:7px;overflow:hidden}
+.stage-trg{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none}
+.stage-trg:hover{background:var(--bg)}
+.s-badge{display:inline-flex;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:var(--grn-l);color:var(--grn);flex-shrink:0}
+.s-tagline{font-size:12px;color:var(--t3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-chev{width:14px;height:14px;flex-shrink:0;color:var(--t3);transition:transform .2s}
+.s-chev.open{transform:rotate(180deg)}
+.stage-body{display:none;padding:0 18px 16px;border-top:1px solid var(--bl)}
+.stage-body.open{display:block}
+.s-bullets{list-style:none;margin:12px 0 10px}
+.s-bullets li{font-size:12px;color:var(--t2);padding:2px 0 2px 13px;position:relative;line-height:1.5}
+.s-bullets li::before{content:'';position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--grn)}
+.s-para{font-size:12px;color:var(--t2);line-height:1.65}
+
+/* ── CONTENT SECTIONS ── */
+.content{padding:24px 0;animation:up .3s .2s ease both}
+
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cc{background:var(--sur);border:1px solid var(--b);border-radius:7px;padding:18px}
+.cc.full-width{grid-column:1 / -1}
+.cc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:2px}
+.cc-title{font-size:12px;font-weight:600;color:var(--t1)}
+.cc-ins{font-size:11px;font-style:italic;color:var(--t3);margin-bottom:14px;line-height:1.4}
+.cc-box{position:relative;height:170px}
+
+/* Toggle */
+.tog{display:inline-flex;background:#F0F0F0;border-radius:5px;padding:2px;gap:1px;flex-shrink:0;height:28px;align-items:center}
+.tb{border:none;background:transparent;font-family:inherit;font-size:10px;font-weight:500;color:var(--t3);padding:4px 12px;border-radius:4px;cursor:pointer;transition:background .1s,color .1s}
+.tb.on{background:var(--t1);color:#fff}
+
+/* Zone legend */
+.zlgd{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px}
+.zi{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3)}
+.zd{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:0.5}
+.empty-title{font-size:14px;font-weight:600;color:var(--t2);margin-bottom:8px}
+.empty-sub{font-size:12px;color:var(--t3);max-width:280px;line-height:1.5}
+
+/* ── SESSION TABLE ── */
+.tbl-wrap{padding:24px 0 48px;animation:up .3s .25s ease both}
+.tbl-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:0 10px 10px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--b)}
+thead th:first-child{padding-left:0}
+tbody tr.sr{cursor:pointer;border-bottom:1px solid var(--bl);transition:background .1s;height:44px}
+tbody tr.sr:hover,tbody tr.sr.open{background:#FAFAFA}
+tbody td{padding:13px 10px;font-size:12px;color:var(--t1)}
+tbody td:first-child{padding-left:0}
+.row-arrow{color:var(--t3);font-size:10px;margin-left:6px;transition:transform .2s;display:inline-block}
+tr.sr.open .row-arrow{transform:rotate(90deg)}
+.tbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border:1px solid var(--b);border-radius:20px;font-size:10px;font-weight:500;color:var(--t2)}
+.det-row td{padding:0;background:#FAFAFA;border-bottom:1px solid var(--bl)}
+.det-inner{padding:16px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;animation:up .2s ease}
+.di .dl{font-size:10px;color:var(--t3);margin-bottom:2px}
+.di .dv{font-size:12px;font-weight:500}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:16px 0 24px;font-size:11px;color:var(--t3);border-top:1px solid var(--bl)}
+
+/* ── ANIMATIONS ── */
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MOBILE ── */
+@media(max-width:700px){
+  .w{padding:0 16px}
+
+  /* Calendar: clip overflow — JS will reduce week count */
+  .cal-sec{overflow-x:hidden}
+  .cal-body{min-width:0;overflow:hidden}
+
+  /* Metrics: 2×3 grid */
+  .metrics-strip{flex-wrap:wrap}
+  .metric{flex:0 0 50%;border-right:none;border-bottom:1px solid var(--bl);padding:12px 0}
+  .metric:nth-child(5),.metric:nth-child(6){border-bottom:none}
+  .metric::after{display:none}
+  .m-num{font-size:22px}
+  .metric:first-child .m-num{font-size:26px}
+
+  /* Controls: stack tabs above, activity+view on same row */
+  .controls{gap:8px 6px}
+  .ctrl-spacer{display:none}
+  .sec-tabs{order:-1;width:100%;display:flex;border-bottom:1px solid var(--bl)}
+  .stab{flex:1;text-align:center;font-size:12px;padding:5px 8px 7px}
+  #actFilter{order:0;flex-wrap:wrap;gap:2px}
+  #actFilter .pill{font-size:11px;padding:5px 10px}
+  #viewTog{order:1;margin-left:auto}
+
+  /* Charts */
+  .charts-grid{grid-template-columns:1fr}
+  .cc.full-width{grid-column:1}
+  .cc{padding:14px}
+  .cc-box{height:150px}
+
+  /* Zone legend: WHO target wraps below */
+  .zlgd{gap:6px 12px}
+  .zlgd .zi:last-child{margin-left:0}
+
+  /* Session table: hide lower-priority columns */
+  .det-inner{grid-template-columns:1fr 1fr}
+  thead th:nth-child(n+5),tbody td:nth-child(n+5){display:none}
+
+  /* Stage tagline can wrap */
+  .s-tagline{white-space:normal;overflow:visible;font-size:11px}
+}
+
+/* Touch: tap-to-show tooltips on heatmap */
+@media(hover:none){
+  .hc:hover .hc-tip{opacity:0}
+  .hc-tip.show{
+    opacity:1!important;
+    pointer-events:auto;
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    font-size:11px;
+    z-index:999;
+  }
+  .hc-tip.show::after{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="w">
+    <div class="logo">Fitness</div>
+    <div class="nav-r" id="navMeta">—</div>
+  </div>
+</nav>
+
+<div class="w">
+
+  <!-- CALENDAR -->
+  <section class="cal-sec">
+    <div class="cal-label" id="calLabel">Activity — last 52 weeks</div>
+    <div class="cal-wrap">
+      <!-- Day labels -->
+      <div class="cal-days">
+        <div class="cal-days-grid" id="calDays"></div>
+      </div>
+      <!-- Grid -->
+      <div class="cal-body">
+        <div class="cal-months-row" id="calMonths"></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+    <div class="cal-foot">
+      <span class="cal-foot-stats" id="calStats">—</span>
+      <div class="cal-legend">
+        <span>Less</span>
+        <div class="hc" style="background:var(--h0)"></div>
+        <div class="hc" style="background:var(--h1)"></div>
+        <div class="hc" style="background:var(--h2)"></div>
+        <div class="hc" style="background:var(--h3)"></div>
+        <div class="hc" style="background:var(--h4)"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- METRICS STRIP -->
+  <section class="metrics-sec">
+    <div class="metrics-strip" id="metricStrip">
+      <div class="metric"><div class="m-lbl">Sessions</div><div class="m-num" id="mSess">—</div><div class="m-ctx" id="mSessCtx"></div></div>
+      <div class="metric"><div class="m-lbl">Avg kcal</div><div class="m-num" id="mCal">—</div><div class="m-ctx" id="mCalCtx"></div></div>
+      <div class="metric"><div class="m-lbl">Avg duration</div><div class="m-num" id="mDur">—</div><div class="m-ctx" id="mDurCtx"></div></div>
+      <div class="metric"><div class="m-lbl">Avg HR</div><div class="m-num" id="mHR">—</div><div class="m-ctx" id="mHRCtx"></div></div>
+      <div class="metric"><div class="m-lbl">Steps</div><div class="m-num" id="mSteps">—</div><div class="m-ctx" id="mStepsCtx"></div></div>
+      <div class="metric"><div class="m-lbl">Avg load</div><div class="m-num" id="mLoad">—</div><div class="m-ctx" id="mLoadCtx"></div></div>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <!-- Activity filter -->
+    <div class="pill-group" id="actFilter">
+      <button class="pill on" data-f="all">All</button>
+      <button class="pill" data-f="workout">💪 Workout</button>
+      <button class="pill dim" data-f="walking">🚶 Walking</button>
+    </div>
+    <div class="ctrl-spacer"></div>
+    <!-- Section tabs -->
+    <div class="sec-tabs">
+      <button class="stab on" data-s="perf">Performance</button>
+      <button class="stab" data-s="recov">Recovery</button>
+    </div>
+    <!-- View toggle -->
+    <div class="pill-group" id="viewTog">
+      <button class="pill on" data-v="daily">Daily</button>
+      <button class="pill" data-v="weekly">Weekly</button>
+    </div>
+  </div>
+
+  <!-- STAGE CARD -->
+  <div class="stage-wrap">
+    <div class="stage-card" id="stageCard">
+      <div class="stage-trg" id="stageTrg">
+        <span class="s-badge" id="sBadge">—</span>
+        <span class="s-tagline" id="sTagline">Tap to expand</span>
+        <svg class="s-chev" id="sChev" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5l4 4 4-4"/></svg>
+      </div>
+      <div class="stage-body" id="stageBody">
+        <ul class="s-bullets" id="sBullets"></ul>
+        <p class="s-para" id="sPara"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE SECTION -->
+  <section class="content" id="perfSec">
+    <div class="charts-grid">
+
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-title">Training load</div>
+          <div class="tog"><button class="tb on" data-c="cLoad" data-t="line">Line</button><button class="tb" data-c="cLoad" data-t="bar">Bar</button></div>
+        </div>
+        <div class="cc-ins" id="iLoad">—</div>
+        <div class="cc-box"><canvas id="cLoad"></canvas></div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-title">Calories burned</div>
+          <div class="tog"><button class="tb" data-c="cCal" data-t="line">Line</button><button class="tb on" data-c="cCal" data-t="bar">Bar</button></div>
+        </div>
+        <div class="cc-ins" id="iCal">—</div>
+        <div class="cc-box"><canvas id="cCal"></canvas></div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-title">Session duration</div>
+          <div class="tog"><button class="tb on" data-c="cDur" data-t="line">Line</button><button class="tb" data-c="cDur" data-t="bar">Bar</button></div>
+        </div>
+        <div class="cc-ins" id="iDur">—</div>
+        <div class="cc-box"><canvas id="cDur"></canvas></div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Time in HR zones</div></div>
+        <div class="cc-ins" id="iZones">—</div>
+        <div class="cc-box"><canvas id="cZones"></canvas></div>
+        <div class="zlgd">
+          <div class="zi"><div class="zd" style="background:var(--z1)"></div>Z1 Warm-up</div>
+          <div class="zi"><div class="zd" style="background:var(--z2)"></div>Z2 Easy</div>
+          <div class="zi"><div class="zd" style="background:var(--z3)"></div>Z3 Aerobic</div>
+          <div class="zi"><div class="zd" style="background:var(--z4)"></div>Z4 Threshold</div>
+          <div class="zi"><div class="zd" style="background:var(--z5)"></div>Z5 Max</div>
+        </div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Training effect</div></div>
+        <div class="cc-ins" id="iTE">—</div>
+        <div class="cc-box"><canvas id="cTE"></canvas></div>
+        <div class="zlgd">
+          <div class="zi"><div class="zd" style="background:var(--grn)"></div>Aerobic TE</div>
+          <div class="zi"><div class="zd" style="background:#CCC"></div>Anaerobic TE</div>
+        </div>
+      </div>
+
+      <div class="cc full-width">
+        <div class="cc-head"><div class="cc-title">Weekly intensity minutes</div></div>
+        <div class="cc-ins" id="iIntensity">—</div>
+        <div class="cc-box"><canvas id="cIntensity"></canvas></div>
+        <div class="zlgd">
+          <div class="zi"><div class="zd" style="background:#9CA3AF"></div>Moderate</div>
+          <div class="zi"><div class="zd" style="background:var(--grn)"></div>Vigorous</div>
+          <div class="zi" style="margin-left:auto;font-style:italic">WHO target: 75+ vigorous min/week</div>
+        </div>
+      </div>
+
+      <div class="cc full-width">
+        <div class="cc-head"><div class="cc-title">Ambient temperature vs performance</div></div>
+        <div class="cc-ins" id="iWeather">—</div>
+        <div class="cc-box"><canvas id="cWeather"></canvas></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RECOVERY SECTION (hidden by default) -->
+  <section class="content" id="recovSec" style="display:none">
+    <div class="charts-grid">
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Sleep score — last 30 days</div></div>
+        <div class="cc-ins" id="iSleep">—</div>
+        <div class="cc-box"><canvas id="cSleep"></canvas></div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Body battery charged per night</div></div>
+        <div class="cc-ins" id="iBB">—</div>
+        <div class="cc-box"><canvas id="cBB"></canvas></div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Sleep stages breakdown</div></div>
+        <div class="cc-ins" id="iStages">—</div>
+        <div class="cc-box"><canvas id="cStages"></canvas></div>
+        <div class="zlgd">
+          <div class="zi"><div class="zd" style="background:var(--sleep-deep)"></div>Deep</div>
+          <div class="zi"><div class="zd" style="background:var(--sleep-rem)"></div>REM</div>
+          <div class="zi"><div class="zd" style="background:var(--sleep-light)"></div>Light</div>
+          <div class="zi"><div class="zd" style="background:var(--sleep-wake)"></div>Awake</div>
+        </div>
+      </div>
+
+      <div class="cc">
+        <div class="cc-head"><div class="cc-title">Sleep score vs session load</div></div>
+        <div class="cc-ins" id="iCorr">—</div>
+        <div class="cc-box"><canvas id="cCorr"></canvas></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WALKING EMPTY STATE -->
+  <section class="content" id="walkingSec" style="display:none">
+    <div class="empty-state">
+      <div class="empty-icon">🚶</div>
+      <div class="empty-title">No walking sessions yet</div>
+      <div class="empty-sub">Walking sessions will appear here automatically when synced from Garmin</div>
+    </div>
+  </section>
+
+  <!-- SESSION LOG -->
+  <div class="tbl-wrap" id="tblWrap">
+    <div class="tbl-label" id="tblLabel">Sessions</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Duration</th><th>Calories</th><th>Avg HR</th><th>Load</th><th>Sleep prior</th>
+        </tr>
+      </thead>
+      <tbody id="tblBody"></tbody>
+    </table>
+  </div>
+
+  <!-- WALKING TABLE EMPTY -->
+  <div class="tbl-wrap" id="tblWalkWrap" style="display:none">
+    <div class="tbl-label">Sessions</div>
+    <div class="empty-state" style="padding:40px 20px">
+      <div class="empty-icon">🚶</div>
+      <div class="empty-title">No walking sessions yet</div>
+      <div class="empty-sub">Walking sessions will appear here automatically when synced from Garmin</div>
+    </div>
+  </div>
+
+</div><!-- /w -->
+
+<footer>⌚ Synced from Garmin · <span id="footDate">—</span></footer>
+
+<script>
+// ── Chart.js defaults ───────────────────────────────────────────────────────
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size   = 10;
+Chart.defaults.color       = '#AAAAAA';
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.scale.grid.color       = '#F2F2F2';
+Chart.defaults.scale.grid.drawBorder  = false;
+Chart.defaults.elements.bar.borderRadius = 4;
+Chart.defaults.elements.bar.borderWidth  = 0;
+Chart.defaults.elements.line.tension     = 0.3;
+Chart.defaults.elements.point.radius     = window.innerWidth <= 700 ? 2 : 3;
+Chart.defaults.elements.point.hoverRadius = 5;
+Chart.defaults.elements.point.backgroundColor = '#1A7F4B';
+Chart.defaults.elements.point.borderColor     = '#1A7F4B';
+
+// ── State ───────────────────────────────────────────────────────────────────
+let SESS = [], SLEEP = [], FILTERED = [];
+let activeFilter = 'all', activeSection = 'perf', activeView = 'daily';
+const CFG = {};
+
+// ── Utils ───────────────────────────────────────────────────────────────────
+const localDs = d => {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
+const fmtD   = s => new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+const fmtSh  = s => new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const fmtN   = n => new Intl.NumberFormat().format(Math.round(n));
+const asc    = a => [...a].sort((x,y) => new Date(x.date)-new Date(y.date));
+const avg    = (a,f) => a.length ? a.reduce((t,x)=>t+(f(x)||0),0)/a.length : 0;
+
+function countUp(el, end, sfx='') {
+  const dur=500, t0=performance.now();
+  const tick = t => {
+    const p = Math.min((t-t0)/dur,1);
+    el.textContent = fmtN(p*end)+sfx;
+    if(p<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ── Heatmap ─────────────────────────────────────────────────────────────────
+function heatCol(cal) {
+  if(!cal) return 'var(--h0)';
+  if(cal<300) return 'var(--h1)';
+  if(cal<450) return 'var(--h2)';
+  if(cal<600) return 'var(--h3)';
+  return 'var(--h4)';
+}
+
+function buildCal(sessions) {
+  const grid  = document.getElementById('calGrid');
+  const months= document.getElementById('calMonths');
+  const days  = document.getElementById('calDays');
+  const stats = document.getElementById('calStats');
+  grid.innerHTML = months.innerHTML = days.innerHTML = '';
+
+  // Build session lookup by local date
+  const byDate = {};
+  sessions.forEach(s => {
+    const k = s.date;
+    if(!byDate[k]) byDate[k]={cal:0,dur:0,type:s.activityType||'activity'};
+    byDate[k].cal += s.calories;
+    byDate[k].dur += s.durationMinutes;
+  });
+
+  const isMob = window.innerWidth <= 700;
+  const WEEKS = isMob ? 26 : 52;
+  const GAP   = isMob ? 1 : 2;
+
+  // Start: Monday of current week, go back WEEKS-1 weeks
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay(); // 0=Sun
+  const daysToMon = dow===0?6:dow-1;
+  const thisMon = new Date(today); thisMon.setDate(today.getDate()-daysToMon);
+  const start   = new Date(thisMon); start.setDate(thisMon.getDate()-(WEEKS-1)*7);
+
+  document.getElementById('calLabel').textContent = `Activity — last ${WEEKS} weeks`;
+
+  // Compute dynamic cell size based on container width
+  const calBody = document.querySelector('.cal-body');
+  const containerW = calBody.offsetWidth || 600;
+  // Fit all weeks exactly: COL = total_width / weeks, CELL = COL - GAP
+  const COL  = containerW / WEEKS;
+  const CELL = Math.max(isMob ? 7 : 10, Math.floor(COL) - GAP);
+  
+  // Set grid dimensions dynamically
+  grid.style.gap = `${GAP}px`;
+  grid.style.gridTemplateRows = `repeat(7, ${CELL}px)`;
+
+  // Day labels: Mon / Wed / Fri
+  const dayNames = ['Mon','','Wed','','Fri','',''];
+  days.querySelector('.cal-days-grid')?.remove();
+  const dg = document.createElement('div');
+  dg.className = 'cal-days-grid';
+  dg.style.gridTemplateRows = `repeat(7, ${CELL}px)`;
+  dg.style.gap = `${GAP}px`;
+  dayNames.forEach(n => {
+    const s = document.createElement('span');
+    s.textContent = n;
+    dg.appendChild(s);
+  });
+  days.appendChild(dg);
+
+  // Month labels row
+  let lastMo = -1;
+  for(let w=0;w<WEEKS;w++){
+    const d=new Date(start); d.setDate(start.getDate()+w*7);
+    if(d.getMonth()!==lastMo){
+      const lbl=document.createElement('span');
+      lbl.className='cal-mlbl';
+      lbl.textContent=d.toLocaleDateString('en-GB',{month:'short'});
+      lbl.style.left=`${w*COL}px`;
+      months.appendChild(lbl);
+      lastMo=d.getMonth();
+    }
+  }
+
+  // Cells
+  let activeDays=0, streak=0, cur=0;
+  for(let w=0;w<WEEKS;w++){
+    for(let day=0;day<7;day++){
+      const d=new Date(start); d.setDate(start.getDate()+w*7+day);
+      if(d>today){const c=document.createElement('div');c.className='hc';c.style.background='transparent';grid.appendChild(c);continue;}
+      const key=localDs(d);
+      const data=byDate[key];
+      const cell=document.createElement('div');
+      cell.className='hc';
+      cell.style.background=heatCol(data?.cal);
+      if(data){
+        activeDays++; cur++;
+        if(cur>streak) streak=cur;
+        const dn=d.toLocaleDateString('en-GB',{weekday:'short'});
+        const df=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+        const tp=`${dn} ${df} · ${data.type.charAt(0).toUpperCase()+data.type.slice(1)} · ${data.cal} kcal`;
+        const tip=document.createElement('div');
+        tip.className='hc-tip';
+        tip.textContent=tp;
+        cell.appendChild(tip);
+      } else { cur=0; }
+      grid.appendChild(cell);
+    }
+  }
+  stats.textContent=`${activeDays} active day${activeDays!==1?'s':''} · Current streak: ${streak} day${streak!==1?'s':''}`;
+}
+
+// ── Metrics ─────────────────────────────────────────────────────────────────
+function renderMetrics(ss) {
+  const n   = ss.length;
+  const cal = ss.reduce((t,x)=>t+x.calories,0);
+  const avgCal = n ? cal/n : 0;
+  const dur = n?avg(ss,x=>x.durationMinutes):0;
+  const hr  = n?avg(ss,x=>x.avgHR):0;
+  const ld  = n?avg(ss,x=>x.trainingLoad):0;
+  const totalSteps = ss.reduce((t,x)=>t+(x.steps||0),0);
+  const avgSteps = n ? totalSteps/n : 0;
+  const s   = asc(ss);
+
+  countUp(document.getElementById('mSess'), n);
+  countUp(document.getElementById('mCal'),  avgCal);
+  countUp(document.getElementById('mDur'),  dur, ' min');
+  countUp(document.getElementById('mHR'),   hr,  ' bpm');
+  countUp(document.getElementById('mSteps'), totalSteps);
+  document.getElementById('mLoad').textContent = ld.toFixed(1);
+
+  // Contexts
+  const best = n ? ss.reduce((m,x)=>x.trainingLoad>m.trainingLoad?x:m,ss[0]) : null;
+  document.getElementById('mSessCtx').textContent  = 'since May 2026';
+  document.getElementById('mCalCtx').textContent   = `${fmtN(cal)} total`;
+  document.getElementById('mDurCtx').textContent   = s.length>1?(dur>s[0].durationMinutes?'↑ trending longer':'stable'):'';
+  document.getElementById('mHRCtx').textContent    = hr<115?'easy zone':hr<130?'aerobic zone':'pushing hard';
+  document.getElementById('mStepsCtx').textContent = `${fmtN(Math.round(avgSteps))} avg per session`;
+  document.getElementById('mLoadCtx').textContent  = best?`peak ${best.trainingLoad.toFixed(1)} on ${fmtSh(best.date)}`:'';
+}
+
+// ── Stage card ───────────────────────────────────────────────────────────────
+function renderStage(ss) {
+  if(!ss.length) return;
+  const s    = asc(ss);
+  const avgL = avg(ss,x=>x.trainingLoad);
+  const trend= s.length>1?s[s.length-1].trainingLoad-s[0].trainingLoad:0;
+  const z45  = ss.reduce((t,x)=>t+(x.hrZone4Sec||0)+(x.hrZone5Sec||0),0);
+  const zAll = ss.reduce((t,x)=>t+(x.hrZone1Sec||0)+(x.hrZone2Sec||0)+(x.hrZone3Sec||0)+(x.hrZone4Sec||0)+(x.hrZone5Sec||0),0);
+  const iPct = zAll>0?(z45/zAll)*100:0;
+
+  let stage, color, tagline, bullets, para;
+  if(avgL<25){
+    stage='Getting Started'; color='#888';
+    tagline=`Avg load ${avgL.toFixed(1)} · building consistency`;
+    bullets=['Low training load — early adaptation phase','Showing up is the entire job right now','Focus: frequency over intensity'];
+    para="You're establishing the habit. Consistent easy sessions for 4 weeks creates the base everything else builds on.";
+  } else if(avgL<55&&iPct<6){
+    stage='Building Aerobic Base'; color='#1A7F4B';
+    tagline=`Avg load ${avgL.toFixed(1)} · load ${trend>0?'trending up ↑':'stable'}`;
+    bullets=[
+      `Avg load ${avgL.toFixed(1)} — solid aerobic work accumulating`,
+      trend>0?'Load trending upward — progressive overload is happening':'Consistent load — good maintenance frequency',
+      'Zone 2–3 dominant — exactly right for this phase',
+      'Low body battery cost per session — recovery keeping pace with training'
+    ];
+    para="You're in the most important training phase. Zone 2–3 work compounds into better court speed and endurance over 6–8 weeks. Keep frequency consistent before adding intensity.";
+  } else if(avgL<80){
+    stage='Developing Fitness'; color='#2563EB';
+    tagline=`Avg load ${avgL.toFixed(1)} · ${iPct.toFixed(0)}% in zones 4–5`;
+    bullets=['Aerobic base is solid','Higher intensity developing — anaerobic capacity building','Watch recovery closely at this load level'];
+    para="Foundation is built. Sport-specific fitness develops now. Monitor sleep and HRV — at this volume, recovery quality equals training quality.";
+  } else {
+    stage='Performance Phase'; color='#DC2626';
+    tagline=`Avg load ${avgL.toFixed(1)} · high-intensity training`;
+    bullets=['High training volume','Regularly in zones 4–5','Recovery management is critical'];
+    para="Training at a high level. Sleep, nutrition, and rest days are as important as sessions. One bad recovery block undoes multiple good training weeks.";
+  }
+
+  document.getElementById('sBadge').textContent    = stage;
+  document.getElementById('sBadge').style.background = color+'20';
+  document.getElementById('sBadge').style.color      = color;
+  document.getElementById('sTagline').textContent   = tagline;
+  document.getElementById('sBullets').innerHTML     = bullets.map(b=>`<li>${b}</li>`).join('');
+  document.getElementById('sPara').textContent      = para;
+  document.querySelector('.stage-card').style.borderLeftColor = color;
+}
+
+document.getElementById('stageTrg').addEventListener('click',()=>{
+  const b=document.getElementById('stageBody');
+  const c=document.getElementById('sChev');
+  const open=b.classList.contains('open');
+  b.classList.toggle('open',!open);
+  c.classList.toggle('open',!open);
+});
+
+// ── Chart helpers ────────────────────────────────────────────────────────────
+const BASE = {
+  responsive:true, maintainAspectRatio:false,
+  animation:{duration:500,easing:'easeOutQuart'},
+  scales:{
+    x:{grid:{display:false},ticks:{maxRotation:0, autoSkip:true, maxTicksLimit: window.innerWidth<=700 ? 5 : 12}},
+    y:{beginAtZero:true}
+  }
+};
+
+function mk(id, type, data, opts) {
+  const cv = document.getElementById(id);
+  if(!cv) return;
+  const ex = Chart.getChart(cv);
+  if(ex) ex.destroy();
+  CFG[id] = {data:JSON.parse(JSON.stringify(data)), opts};
+  return new Chart(cv,{type,data,options:opts});
+}
+
+// ── Weekly Intensity helper ──────────────────────────────────────────────────
+function weeklyIntensity(sessions) {
+  const weeks = {};
+  sessions.forEach(s => {
+    const d = new Date(s.date + 'T00:00:00');
+    const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    const mon = new Date(d); mon.setDate(d.getDate() - dow);
+    const key = localDs(mon);
+    if (!weeks[key]) weeks[key] = { mod: 0, vig: 0 };
+    weeks[key].mod += s.moderateIntensityMin || 0;
+    weeks[key].vig += s.vigorousIntensityMin || 0;
+  });
+  return Object.entries(weeks)
+    .sort(([a],[b]) => new Date(a) - new Date(b))
+    .map(([k, v]) => ({ week: k, ...v }));
+}
+
+// ── Weather insight helper ───────────────────────────────────────────────────
+function weatherInsight(sessions) {
+  const s = sessions.filter(x => x.tempC != null);
+  if (s.length < 2) return 'Weather data available for ' + s.length + ' session' + (s.length !== 1 ? 's' : '') + '.';
+  const coolest = s.reduce((m,x) => x.tempC < m.tempC ? x : m, s[0]);
+  const warmest = s.reduce((m,x) => x.tempC > m.tempC ? x : m, s[0]);
+  // Pearson-lite correlation: temp vs load
+  const avgT = s.reduce((t,x)=>t+x.tempC,0)/s.length;
+  const avgL = s.reduce((t,x)=>t+x.trainingLoad,0)/s.length;
+  const num  = s.reduce((t,x)=>t+(x.tempC-avgT)*(x.trainingLoad-avgL),0);
+  const den  = Math.sqrt(s.reduce((t,x)=>t+(x.tempC-avgT)**2,0)*s.reduce((t,x)=>t+(x.trainingLoad-avgL)**2,0));
+  const r    = den>0 ? (num/den).toFixed(2) : 0;
+  const dir  = r > 0.2 ? 'Warmer sessions trend higher load' : r < -0.2 ? 'Cooler sessions trend higher load' : 'Temperature has minimal impact on load';
+  return `${dir} (r=${r}). Range: ${coolest.tempC}°C (${fmtSh(coolest.date)}) to ${warmest.tempC}°C (${fmtSh(warmest.date)}).`;
+}
+
+// ── Performance charts ───────────────────────────────────────────────────────
+function renderPerf(ss) {
+  const s   = asc(ss);
+  const lbl = s.map(x=>fmtSh(x.date));
+  const grn = '#1A7F4B';
+
+  // Insights
+  const peakL = ss.length?ss.reduce((m,x)=>x.trainingLoad>m.trainingLoad?x:m,ss[0]):null;
+  const avgDur = ss.length?avg(ss,x=>x.durationMinutes).toFixed(0):0;
+  const totCal = ss.reduce((t,x)=>t+x.calories,0);
+  const bestCal= ss.length?ss.reduce((m,x)=>x.calories>m.calories?x:m,ss[0]):null;
+  const z2t  = ss.reduce((t,x)=>t+(x.hrZone2Sec||0),0);
+  const z3t  = ss.reduce((t,x)=>t+(x.hrZone3Sec||0),0);
+  const zAll = ss.reduce((t,x)=>t+(x.hrZone1Sec||0)+(x.hrZone2Sec||0)+(x.hrZone3Sec||0)+(x.hrZone4Sec||0)+(x.hrZone5Sec||0),0);
+  const z23p = zAll>0?((z2t+z3t)/zAll*100).toFixed(0):0;
+  const aAero= ss.length?avg(ss,x=>x.aerobicTE).toFixed(1):0;
+  const aAna = ss.length?avg(ss,x=>x.anaerobicTE).toFixed(1):0;
+
+  document.getElementById('iLoad').textContent  = peakL?`Peak ${peakL.trainingLoad.toFixed(1)} on ${fmtSh(peakL.date)}. ${s.length>2&&s[s.length-1].trainingLoad>s[0].trainingLoad?'Trending up ↑.':'Stable load.'}` : '—';
+  document.getElementById('iCal').textContent   = bestCal?`${fmtN(totCal)} kcal total. Best: ${bestCal.calories} kcal on ${fmtSh(bestCal.date)}.`:'—';
+  document.getElementById('iDur').textContent   = `Avg ${avgDur} min. ${s.length>1&&s[s.length-1].durationMinutes>s[0].durationMinutes?'Sessions getting longer.':'Consistent length.'}`;
+  document.getElementById('iZones').textContent = `${z23p}% of court time in zones 2–3 — aerobic base work.`;
+  document.getElementById('iTE').textContent    = `Avg aerobic TE ${aAero} · anaerobic ${aAna}. Aerobic foundation dominant.`;
+
+  mk('cLoad','line',{labels:lbl,datasets:[{data:s.map(x=>+x.trainingLoad.toFixed(1)),borderColor:grn,backgroundColor:'rgba(26,127,75,.07)',fill:true}]},BASE);
+  mk('cCal', 'bar', {labels:lbl,datasets:[{data:s.map(x=>x.calories),backgroundColor:grn}]},{...BASE,scales:{...BASE.scales,y:{beginAtZero:true,title:{display:false}}}});
+  mk('cDur', 'line',{labels:lbl,datasets:[{data:s.map(x=>+x.durationMinutes.toFixed(1)),borderColor:grn,backgroundColor:'rgba(26,127,75,.07)',fill:true}]},BASE);
+  mk('cZones','bar',{labels:lbl,datasets:[
+    {data:s.map(x=>+((x.hrZone1Sec||0)/60).toFixed(1)),backgroundColor:'var(--z1)',label:'Z1'},
+    {data:s.map(x=>+((x.hrZone2Sec||0)/60).toFixed(1)),backgroundColor:'var(--z2)',label:'Z2'},
+    {data:s.map(x=>+((x.hrZone3Sec||0)/60).toFixed(1)),backgroundColor:'var(--z3)',label:'Z3'},
+    {data:s.map(x=>+((x.hrZone4Sec||0)/60).toFixed(1)),backgroundColor:'var(--z4)',label:'Z4'},
+    {data:s.map(x=>+((x.hrZone5Sec||0)/60).toFixed(1)),backgroundColor:'var(--z5)',label:'Z5'},
+  ]},{...BASE,scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0}},y:{stacked:true,beginAtZero:true}}});
+  mk('cTE','bar',{labels:lbl,datasets:[
+    {data:s.map(x=>x.aerobicTE||0),  backgroundColor:'#1A7F4B',label:'Aerobic'},
+    {data:s.map(x=>x.anaerobicTE||0),backgroundColor:'#CCC',   label:'Anaerobic'},
+  ]},{...BASE,scales:{...BASE.scales,y:{beginAtZero:true,max:5}}});
+
+  // Weekly Intensity Minutes chart
+  const weekly = weeklyIntensity(ss);
+  const totalVig = ss.reduce((t,x) => t + (x.vigorousIntensityMin || 0), 0);
+  document.getElementById('iIntensity').textContent = `${totalVig} total vigorous minutes this month. Weekly target is 75+ min.`;
+  
+  const weekLabels = weekly.map(w => 'Wk of ' + new Date(w.week + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+  mk('cIntensity', 'bar', {
+    labels: weekLabels,
+    datasets: [
+      { data: weekly.map(w => w.mod), backgroundColor: '#9CA3AF', label: 'Moderate' },
+      { data: weekly.map(w => w.vig), backgroundColor: '#1A7F4B', label: 'Vigorous' }
+    ]
+  }, {
+    ...BASE,
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0 } },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'minutes' } }
+    }
+  });
+
+  // Weather correlation chart
+  document.getElementById('iWeather').textContent = weatherInsight(ss);
+  
+  const weatherData = ss
+    .filter(x => x.tempC != null && x.trainingLoad != null)
+    .map(x => ({
+      x: x.tempC,
+      y: x.trainingLoad,
+      label: fmtSh(x.date),
+      humidity: x.humidity
+    }));
+  
+  // Color based on temperature (cooler = blue, warmer = orange)
+  const tempColors = weatherData.map(d => {
+    const t = d.x;
+    if (t < 25) return '#3B82F6'; // blue
+    if (t < 27) return '#22C55E'; // green
+    return '#F97316'; // orange
+  });
+
+  mk('cWeather', 'scatter', {
+    datasets: [{
+      data: weatherData,
+      backgroundColor: tempColors,
+      pointRadius: 8,
+      pointHoverRadius: 10,
+    }]
+  }, {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 500 },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.raw.label}: ${ctx.raw.x}°C, load ${ctx.raw.y.toFixed(1)}, ${ctx.raw.humidity}% humidity`
+        }
+      }
+    },
+    scales: {
+      x: { title: { display: true, text: 'Temperature (°C)' }, grid: { color: '#F2F2F2' } },
+      y: { title: { display: true, text: 'Training load' }, beginAtZero: true, grid: { color: '#F2F2F2' } }
+    }
+  });
+}
+
+// ── Recovery charts ──────────────────────────────────────────────────────────
+function renderRecov(sleep, sessions) {
+  const sl = sleep.filter(x=>x.sleepScore!=null).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const lbl = sl.map(x=>fmtSh(x.date));
+  const avgSl = sl.length?avg(sl,x=>x.sleepScore).toFixed(0):0;
+  const avgBB = sl.length?avg(sl,x=>x.bodyBatteryCharged).toFixed(0):0;
+
+  // Sleep insight
+  const best = sl.length?sl.reduce((m,x)=>x.sleepScore>m.sleepScore?x:m,sl[0]):null;
+  const worst= sl.length?sl.reduce((m,x)=>x.sleepScore<m.sleepScore?x:m,sl[0]):null;
+  document.getElementById('iSleep').textContent = sl.length?`30d avg: ${avgSl}. Best: ${best.sleepScore} on ${fmtSh(best.date)}. Worst: ${worst.sleepScore} on ${fmtSh(worst.date)}.`:'—';
+  document.getElementById('iBB').textContent    = sl.length?`Avg ${avgBB} pts charged per night. Higher = more recovered going into the day.`:'—';
+  document.getElementById('iStages').textContent= 'Deep sleep is the most restorative. REM drives cognitive recovery.';
+
+  // Correlation insight
+  const paired = sessions.filter(s=>s.priorSleepScore!=null);
+  if(paired.length>1){
+    const hi=paired.reduce((m,x)=>x.priorSleepScore>m.priorSleepScore?x:m,paired[0]);
+    const lo=paired.reduce((m,x)=>x.priorSleepScore<m.priorSleepScore?x:m,paired[0]);
+    document.getElementById('iCorr').textContent=`Best session (load ${hi.trainingLoad.toFixed(1)}) followed sleep score ${hi.priorSleepScore}. Worst (load ${lo.trainingLoad.toFixed(1)}) followed score ${lo.priorSleepScore}. Sleep quality affects output.`;
+  } else {
+    document.getElementById('iCorr').textContent='More sessions needed for correlation analysis.';
+  }
+
+  // Sleep score line
+  mk('cSleep','line',{labels:lbl,datasets:[{
+    data:sl.map(x=>x.sleepScore),
+    borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.07)',fill:true,
+    segment:{borderColor:ctx=>ctx.p1.parsed.y>=75?'#1A7F4B':ctx.p1.parsed.y>=60?'#D97706':'#DC2626'}
+  }]},{...BASE,scales:{...BASE.scales,y:{min:0,max:100,beginAtZero:false}}});
+
+  // Body battery bar
+  mk('cBB','bar',{labels:lbl,datasets:[{
+    data:sl.map(x=>x.bodyBatteryCharged),
+    backgroundColor:sl.map(x=>x.bodyBatteryCharged>=60?'#1A7F4B':x.bodyBatteryCharged>=40?'#D97706':'#DC2626')
+  }]},{...BASE});
+
+  // Sleep stages stacked
+  mk('cStages','bar',{labels:lbl,datasets:[
+    {data:sl.map(x=>+((x.deepSec||0)/3600).toFixed(1)),backgroundColor:'var(--sleep-deep)',label:'Deep'},
+    {data:sl.map(x=>+((x.remSec||0)/3600).toFixed(1)), backgroundColor:'var(--sleep-rem)', label:'REM'},
+    {data:sl.map(x=>+((x.lightSec||0)/3600).toFixed(1)),backgroundColor:'var(--sleep-light)',label:'Light'},
+    {data:sl.map(x=>+((x.awakeSec||0)/3600).toFixed(1)),backgroundColor:'var(--sleep-wake)',label:'Awake'},
+  ]},{...BASE,scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0}},y:{stacked:true,beginAtZero:true,title:{display:true,text:'hrs'}}}});
+
+  // Correlation scatter: prior sleep score vs training load
+  const scatterData = sessions
+    .filter(s=>s.priorSleepScore!=null&&s.trainingLoad!=null)
+    .map(s=>({x:s.priorSleepScore,y:s.trainingLoad,label:fmtSh(s.date)}));
+
+  mk('cCorr','scatter',{
+    datasets:[{
+      data:scatterData,
+      backgroundColor:'#1A7F4B',
+      pointRadius:6,
+      pointHoverRadius:8,
+    }]
+  },{
+    responsive:true,maintainAspectRatio:false,
+    animation:{duration:500},
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.raw.label}: sleep ${ctx.raw.x}, load ${ctx.raw.y.toFixed(1)}`}}
+    },
+    scales:{
+      x:{title:{display:true,text:'Sleep score (night before)'},min:0,max:100,grid:{color:'#F2F2F2'},beginAtZero:true},
+      y:{title:{display:true,text:'Training load'},beginAtZero:true,grid:{color:'#F2F2F2'}}
+    }
+  });
+}
+
+// ── Session table ────────────────────────────────────────────────────────────
+function renderTable(ss, view) {
+  const tbody = document.getElementById('tblBody');
+  const lbl   = document.getElementById('tblLabel');
+  tbody.innerHTML = '';
+
+  if(view==='weekly'){
+    lbl.textContent='Weekly summary';
+    const weeks = {};
+    ss.forEach(s => {
+      const d  = new Date(s.date+'T00:00:00');
+      const dow= d.getDay()===0?6:d.getDay()-1; // Mon=0
+      const mon= new Date(d); mon.setDate(d.getDate()-dow);
+      const wk = localDs(mon);
+      if(!weeks[wk]) weeks[wk]={start:wk,count:0,cal:0,dur:0,hr:[],load:0};
+      weeks[wk].count++; weeks[wk].cal+=s.calories; weeks[wk].dur+=s.durationMinutes;
+      weeks[wk].hr.push(s.avgHR); weeks[wk].load+=s.trainingLoad;
+    });
+    Object.values(weeks).sort((a,b)=>new Date(b.start)-new Date(a.start)).forEach(w=>{
+      const tr=document.createElement('tr');
+      const avgHR=w.hr.length?(w.hr.reduce((t,x)=>t+x,0)/w.hr.length).toFixed(0):'—';
+      tr.innerHTML=`<td>Week of ${fmtSh(w.start)}</td><td>${w.count} session${w.count>1?'s':''}</td><td>${w.dur.toFixed(0)} min</td><td>${fmtN(w.cal)} kcal</td><td>${avgHR} bpm</td><td>${w.load.toFixed(1)}</td><td>—</td>`;
+      tbody.appendChild(tr);
+    });
+    return;
+  }
+
+  lbl.textContent='Sessions';
+  const sorted=[...ss].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  sorted.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.className='sr'; tr.dataset.id=s.activityId;
+    const sleepCell=s.priorSleepScore!=null?`${s.priorSleepScore} / 100`:'—';
+    tr.innerHTML=`
+      <td>${fmtD(s.date)}<span class="row-arrow">▸</span></td>
+      <td><span class="tbadge">💪 ${s.activityType||'workout'}</span></td>
+      <td>${s.durationMinutes.toFixed(0)} min</td>
+      <td>${fmtN(s.calories)} kcal</td>
+      <td>${s.avgHR} bpm</td>
+      <td>${s.trainingLoad.toFixed(1)}</td>
+      <td>${sleepCell}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('tblBody').addEventListener('click',e=>{
+  const row=e.target.closest('tr.sr');
+  if(!row) return;
+  const nx=row.nextElementSibling;
+  if(nx?.classList.contains('det-row')){nx.remove();row.classList.remove('open');return;}
+  document.querySelectorAll('.det-row').forEach(r=>r.remove());
+  document.querySelectorAll('tr.sr.open').forEach(r=>r.classList.remove('open'));
+  const s=SESS.find(x=>x.activityId==row.dataset.id);
+  if(!s) return;
+  const det=document.createElement('tr');
+  det.className='det-row';
+  const tempDisplay = s.tempC != null ? `${s.tempC}°C (feels ${s.feelsLikeC}°C)` : '—';
+  const humidityDisplay = s.humidity != null ? `${s.humidity}%` : '—';
+  det.innerHTML=`<td colspan="7"><div class="det-inner">
+    <div class="di"><div class="dl">Start</div><div class="dv">${s.startTimeLocal}</div></div>
+    <div class="di"><div class="dl">Max HR</div><div class="dv">${s.maxHR} bpm</div></div>
+    <div class="di"><div class="dl">Body battery cost</div><div class="dv">${s.bodyBatteryChange} pts</div></div>
+    <div class="di"><div class="dl">Water loss (est.)</div><div class="dv">${s.waterEstimatedMl} ml</div></div>
+    <div class="di"><div class="dl">Vigorous intensity</div><div class="dv">${s.vigorousIntensityMin} min</div></div>
+    <div class="di"><div class="dl">Aerobic TE</div><div class="dv">${s.aerobicTE} — ${s.aerobicTEMessage}</div></div>
+    <div class="di"><div class="dl">Prior sleep score</div><div class="dv">${s.priorSleepScore??'—'} / 100</div></div>
+    <div class="di"><div class="dl">Prior body battery</div><div class="dv">${s.priorBodyBattery??'—'} pts charged</div></div>
+    <div class="di"><div class="dl">Temperature</div><div class="dv">${tempDisplay}</div></div>
+    <div class="di"><div class="dl">Humidity</div><div class="dv">${humidityDisplay}</div></div>
+  </div></td>`;
+  row.after(det); row.classList.add('open');
+});
+
+// ── Toggle (chart type) ──────────────────────────────────────────────────────
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.tb');
+  if(!btn) return;
+  const id=btn.dataset.c, type=btn.dataset.t;
+  btn.closest('.tog').querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b===btn));
+  const c=CFG[id];
+  if(c) mk(id,type,JSON.parse(JSON.stringify(c.data)),c.opts);
+});
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+document.getElementById('actFilter').addEventListener('click',e=>{
+  const btn=e.target.closest('.pill');
+  if(!btn) return;
+  
+  document.querySelectorAll('#actFilter .pill').forEach(b=>b.classList.toggle('on',b===btn));
+  activeFilter=btn.dataset.f;
+  
+  // Handle walking tab (empty state)
+  if(activeFilter === 'walking') {
+    // Show walking empty state
+    document.getElementById('perfSec').style.display = 'none';
+    document.getElementById('recovSec').style.display = 'none';
+    document.getElementById('walkingSec').style.display = '';
+    document.getElementById('tblWrap').style.display = 'none';
+    document.getElementById('tblWalkWrap').style.display = '';
+    document.querySelector('.stage-wrap').style.display = 'none';
+    return;
+  }
+  
+  // Normal filter behavior
+  document.getElementById('walkingSec').style.display = 'none';
+  document.getElementById('tblWalkWrap').style.display = 'none';
+  document.getElementById('tblWrap').style.display = '';
+  document.querySelector('.stage-wrap').style.display = '';
+  document.getElementById('perfSec').style.display = activeSection==='perf'?'':'none';
+  document.getElementById('recovSec').style.display = activeSection==='recov'?'':'none';
+  
+  FILTERED=activeFilter==='all'?[...SESS]:SESS.filter(s=>s.activityType===activeFilter);
+  renderAll();
+});
+
+// ── Section tabs ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.stab').forEach(btn=>btn.addEventListener('click',()=>{
+  if(activeFilter === 'walking') return; // Don't switch sections in walking mode
+  document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b===btn));
+  activeSection=btn.dataset.s;
+  document.getElementById('perfSec').style.display  = activeSection==='perf'?'':'none';
+  document.getElementById('recovSec').style.display = activeSection==='recov'?'':'none';
+  if(activeSection==='recov') renderRecov(SLEEP, FILTERED);
+}));
+
+// ── View toggle ───────────────────────────────────────────────────────────────
+document.getElementById('viewTog').addEventListener('click',e=>{
+  const btn=e.target.closest('.pill');
+  if(!btn) return;
+  document.querySelectorAll('#viewTog .pill').forEach(b=>b.classList.toggle('on',b===btn));
+  activeView=btn.dataset.v;
+  renderTable(FILTERED, activeView);
+});
+
+// ── Render all ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderMetrics(FILTERED);
+  buildCal(FILTERED);
+  renderStage(FILTERED);
+  renderPerf(FILTERED);
+  renderTable(FILTERED, activeView);
+  const latest=FILTERED.length?FILTERED.reduce((m,s)=>new Date(s.date)>new Date(m.date)?s:m):null;
+  if(latest){
+    const txt='Updated '+fmtD(latest.date);
+    document.getElementById('navMeta').textContent=txt;
+    document.getElementById('footDate').textContent=txt;
+  }
+}
+
+// ── Touch tooltips for heatmap ─────────────────────────────────────────────
+if('ontouchstart' in window) {
+  let activeTip = null;
+  document.getElementById('calGrid').addEventListener('touchstart', e => {
+    const cell = e.target.closest('.hc');
+    if(activeTip) { activeTip.classList.remove('show'); activeTip = null; }
+    if(cell) {
+      const tip = cell.querySelector('.hc-tip');
+      if(tip) { tip.classList.add('show'); activeTip = tip; e.preventDefault(); }
+    }
+  }, {passive:false});
+  // Tap elsewhere to dismiss
+  document.addEventListener('touchstart', e => {
+    if(activeTip && !e.target.closest('#calGrid')) {
+      activeTip.classList.remove('show'); activeTip = null;
+    }
+  }, {passive:true});
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+Promise.all([
+  fetch(`data/sessions.json?v=${Date.now()}`).then(r=>r.json()),
+  fetch(`data/sleep.json?v=${Date.now()}`).then(r=>r.json()).catch(()=>[])
+]).then(([sess,sleep])=>{
+  SESS    = sess;
+  SLEEP   = sleep;
+  FILTERED= [...SESS];
+  renderAll();
+  // Rebuild calendar on resize for dynamic sizing
+  window.addEventListener('resize', () => buildCal(FILTERED));
+}).catch(err=>{
+  document.querySelector('.w').innerHTML='<p style="padding:40px 0;color:var(--t3)">Failed to load data.</p>';
+});
+</script>
+</body>
+</html>
